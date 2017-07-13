@@ -1,0 +1,61 @@
+---
+- name: Create group
+  shell: groupadd -o -g {{ kibana_group_id }} {{ kibana_group }}
+  ignore_errors: true
+
+- name: Create user
+  user: name={{ kibana_user }} uid={{ kibana_user_id }} group={{ kibana_group }} non_unique=true
+
+#Create required directories
+- name: Create Directories
+  file: path={{ item }} state=directory owner={{ kibana_user }} group={{ kibana_group }}
+  with_items:
+    - "{{conf_dir}}"
+
+- name: Copy kibana.yml File for Instance
+  template: src=kibana.yml dest={{conf_dir}}/kibana.yml owner={{ kibana_user }} group={{ kibana_group }} mode=0644 force=yes
+  notify: restart kibana
+
+
+- name: Pull kibana image
+  shell: docker pull "{{ kibana_docker_image }}:{{ kibana_version }}"
+  register: result_docker
+  changed_when: False
+  until: result_docker|success
+  retries: 3
+  delay: 1
+  tags: update
+
+- name: Start kibana containers
+  docker_container:
+    name: kibana
+    image: "{{ kibana_docker_image }}:{{ kibana_version }}"
+    network_mode: host
+    state: present
+    restart_policy: unless-stopped
+    restart_retries: 3
+    log_driver: json-file
+    log_options:
+      max-file: "1"
+      max-size: "20m"
+    labels: "{{ kibana_docker_labels }}"
+    volumes:
+      - /etc/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml
+      - /etc/hosts:/etc/hosts
+      - /etc/localtime:/etc/localtime
+
+
+- name: Create init-script rhel6
+  copy: src=kibana_rhel6 dest=/etc/init.d/kibana owner=root group=root mode=0755
+  when:
+    ansible_distribution_major_version|int < 7
+    and ansible_os_family == 'RedHat'
+
+- name: Create init-script rhel7
+  copy: src=kibana_rhel7 dest=/usr/lib/systemd/system/kibana.service owner=root group=root mode=0644
+  when:
+    ansible_distribution_major_version|int > 6
+    and ansible_os_family == 'RedHat'
+
+- name: Enable init-scripts
+  service: name=kibana enabled=yes state=started

@@ -1,0 +1,4 @@
+---
+server.name: {{ ansible_hostname }}
+server.host: "0"
+elasticsearch.url: http://{{ ansible_hostname }}:9200

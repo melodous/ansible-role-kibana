@@ -1,0 +1,12 @@
+---
+- name: reload facts
+  setup: filter='*'
+
+- name: Create zabbix agent dir for scripts
+  file: path=/etc/zabbix/script/kibana state=directory mode=755 owner=root group=root
+
+- name: Copy redis scripts for monitoring
+  copy: src=kibana_zabbix dest=/etc/zabbix/script/kibana/kibana_zabbix mode=755 owner=root group=root
+
+- name: Add crontab to kibana monitoring
+  cron: name="Kibana Zabbix sender" minute=*/5 cron_file=zabbix user=zabbix job="/etc/zabbix/script/kibana/kibana_zabbix --zabbix {{ zabbix_server }}"

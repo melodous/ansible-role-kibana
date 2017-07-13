@@ -1,0 +1,118 @@
+.. vim: foldmarker=[[[,]]]:foldmethod=marker
+
+pip ansible role default variables
+==================================
+
+.. contents:: Sections
+   :local:
+
+kibana packaging
+----------------
+
+.. envvar:: kibana_docker_imagen
+
+   Kibana docker image
+
+::
+
+  kibana_docker_image: melodous/kibana
+
+
+
+
+.. envvar:: kibana_version
+
+   Kibana docker image version (TAG)
+
+::
+
+  kibana_version: 5.4.1
+
+
+
+
+.. envvar:: kibana_docker_labels
+
+   Yaml dictionary which maps Docker labels.
+   os_environment: Name of the environment, example: Production, by default "default".
+   os_contianer_type: Type of the container, by default kibana.
+
+::
+
+  kibana_docker_labels:
+    os_environment: "{{ docker_os_environment | default('default') }}"
+    os_contianer_type: kibana
+
+
+
+
+Kibana configuration
+----------------------
+
+.. envvar:: kibana_group
+
+   Kibana group name
+
+::
+
+  kibana_group: kibana
+
+
+
+
+.. envvar:: kibana_group_id
+
+   Kibana group id
+
+::
+
+  kibana_group_id: 1000
+
+
+
+
+.. envvar:: kibana_user
+
+   Kibana user name
+
+::
+
+  kibana_user: kibana
+
+
+
+
+.. envvar:: kibana_user_id
+
+   Kibana user id
+
+::
+
+  kibana_user_id: 1000
+
+
+
+
+.. envvar:: conf_dir
+
+   Configuration directory
+
+::
+
+  conf_dir: /etc/kibana
+
+
+
+
+Kibana monitoring management
+------------------------------
+
+.. envvar:: kibana_monitoring
+
+   Enable or disable kibana monitoring
+   ::
+
+     kibana_monitoring: true
+
+
+
