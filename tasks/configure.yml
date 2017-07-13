@@ -2,6 +2,8 @@
 - name: Create group
   shell: groupadd -o -g {{ kibana_group_id }} {{ kibana_group }}
   ignore_errors: true
+  tags:
+    - skip_ansible_lint
 
 - name: Create user
   user: name={{ kibana_user }} uid={{ kibana_user_id }} group={{ kibana_group }} non_unique=true
@@ -16,7 +18,6 @@
   template: src=kibana.yml dest={{conf_dir}}/kibana.yml owner={{ kibana_user }} group={{ kibana_group }} mode=0644 force=yes
   notify: restart kibana
 
-
 - name: Pull kibana image
   shell: docker pull "{{ kibana_docker_image }}:{{ kibana_version }}"
   register: result_docker
@@ -24,7 +25,9 @@
   until: result_docker|success
   retries: 3
   delay: 1
-  tags: update
+  tags:
+    - update
+    - skip_ansible_lint
 
 - name: Start kibana containers
   docker_container:
